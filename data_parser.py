@@ -50,7 +50,7 @@ def parse_data_section(data_section):
 
 
 def parse_route_section(route_section):
-    route_points = []
+    route_points = {}
     for item in route_section:
         parts = re.split(r'\s+', item)
         if len(parts) != 3:

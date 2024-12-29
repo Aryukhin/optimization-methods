@@ -1,14 +1,14 @@
-from data_parser import parse_input, parse_data_section, parse_route_section, parse_order_section
+from data_parser import *
 from utils import find_optimal_route
 
-
 def main():
-    file_path = 'LILA_1.txt'  # Убедитесь, что путь к файлу правильный
+    file_path = 'LILA/LILA_1.txt'  # Убедитесь, что путь к файлу правильный
 
     try:
         # Парсинг данных
         print("Чтение данных из файла...")
         data_section, route_section, order_section = parse_input(file_path)
+
         print("Данные успешно считаны.")
         print("Секция DATA:", data_section)
         print("Секция ROUTE:", route_section)
@@ -27,8 +27,8 @@ def main():
         print("Секция ORDER разобрана:", order_section)
 
         # Нахождение оптимального маршрута
-        print("Нахождение оптимального маршрута...")
-        optimal_path, minimal_cost = find_optimal_route(route_points, data_blocks)
+        # print("Нахождение оптимального маршрута...")
+        # optimal_path, minimal_cost = find_optimal_route(route_points, data_blocks)
 
         # Вывод результатов
         print("Оптимальный маршрут:")
@@ -40,7 +40,6 @@ def main():
         print(f"Ошибка: файл не найден: {fnf_error}")
     except ValueError as e:
         print(f"Ошибка: {e}")
-
 
 if __name__ == "__main__":
     main()
