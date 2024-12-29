@@ -17,7 +17,10 @@ def build_road(elems, order, start_point, route_points):
             length, alpha = elems[item[0]]
             elems_dict[item[0]] = elems_dict.get(item[0], 0) +  1
             if alpha != 0:
-                alpha *= item[1]
+                if item[1] < 0:
+                    alpha *= item[1]
+                else:
+                    alpha *= 1
                 ab = sqrt(18 - 12*cos(alpha))
             else:
                 ab = length
@@ -60,8 +63,11 @@ def check_order(point_array, route_points, used_elems, data):
         if [item[0], item[1]] not in point_array:
             print(f"  Маршрут не проходит через обязательную точку: ({item[0]}, {item[1]})")
             ans = False
-    if point_array[0] != [0, 0] or point_array[-1] != [0, 0]:
-        print(f"  Маршрут начинается и/или заканчивается не в точке (0, 0)")
+    if point_array[0] != [0, 0]:
+        print(f"  Маршрут начинается не в точке (0, 0)")
+        ans = False
+    if point_array[-1] != [0, 0]:
+        print(f"  Маршрут заканчивается не в точке (0, 0)")
         ans = False
     for item in used_elems.items():
         if item[1] > data[item[0]]['quantity']:
@@ -78,7 +84,34 @@ def cost_calculate(used_elems, data, sum_points):
 def arc_len(radius, alpha):
     return pi*radius/180*alpha
 
+def calculate_opt_route(elems, data_section, route_points):
+    opt_points = []
+    routed_points = []
+    point_num = 1
+    for x, y, weight in route_points:
+        if x == 0 and y == 0:
+            continue
+        if weight <= 0:
+            continue
+        else:
+            opt_points.append({
+                'num': point_num,
+                'x': x,
+                'y': y,
+                'weight': weight
+            })
+            point_num += 1
+
+        # Здесь может быть сортировка массива точек.
+
+
+    # print("Оптимальные точки маршрута:")
+    # for point in opt_points:
+    #     print(f'  {point["num"]}: ({point["x"]}, {point["y"]})')
+
+
 def main():
+    route_provided = False
 
     parser = argparse.ArgumentParser()
     parser.add_argument('file_path', type=str, help='Полный путь к файлу')
@@ -95,20 +128,24 @@ def main():
     route_points = parse_route_section(route_section)
     order_points = parse_order_section(order_section)
 
-    if len(order_points) == 0:
-        print('Маршрут не передан, строим свой...')
-    else
-
+    if len(order_points) > 0:
+        route_provided = True
 
     elems = {'L1':[1, 0], 'L2':[2, 0], 'L3':[3, 0], 'L4':[4, 0],
              'T4':[arc_len(3, pi/4), pi/4], 'T8':[arc_len(3, pi/8), pi/8],
              'B1':[4, 0] }
 
-    check_elem_order(order_points, elems)
-    massiv, used_elems, sum_points = build_road(elems, order_points, [0, 0], route_points)
-    check_order(massiv, route_points, used_elems, data_blocks)
+    if route_provided:
+        check_elem_order(order_points, elems)
+        massiv, used_elems, sum_points = build_road(elems, order_points, [0, 0], route_points)
+        check_order(massiv, route_points, used_elems, data_blocks)
+    else:
+        print('Строим маршрут...')
+        return 0
+        order_points = calculate_opt_route(elems, data_blocks, route_points)
+
     cost = cost_calculate(used_elems, data_blocks, sum_points)
-    print(f"Стоимость дороги составила: {cost}")
+    print(f"Стоимость дороги согласно секции ORDER составила: {cost}")
 
     mas_x = [i[0] for i in massiv]
     mas_y = [i[1] for i in massiv]
@@ -123,8 +160,9 @@ def main():
 
     plt.xlabel('X координата')
     plt.ylabel('Y координата')
+
     plt.title(f'Результат анализа файла {file_name}')
-    plt.legend(loc='upper left', bbox_to_anchor=(1.1, 1))
+    plt.legend(loc='upper left', bbox_to_anchor=(1, 1))
 
     plt.subplots_adjust(left=0.2, right=0.6)
 
